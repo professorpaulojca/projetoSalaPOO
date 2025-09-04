@@ -1,41 +1,29 @@
 package br.org.umc.spring.projeto.model;
 
-import lombok.*;
-import jakarta.persistence.*;
-import java.time.LocalDateTime;
-
-@Builder
-@Entity
-@Inheritance(strategy = InheritanceType.JOINED)
-@Table(name = "pessoas")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public abstract class Pessoa {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(nullable = false)
     private String nome;
 
-    @Column(unique = true, nullable = false)
-    private String email;
+    public Long getId() {
+        return id;
+    }
 
-    @Column(unique = true, nullable = false)
-    private String cpf;
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    private String telefone;
+    public String getNome() {
+        return nome;
+    }
 
-    @Builder.Default
-    @Column(updatable = false)
-    private LocalDateTime dataCriacao = LocalDateTime.now();
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
 
-    private LocalDateTime dataAtualizacao;
+    public Pessoa() {}
 
-    @PreUpdate
-    public void preUpdate() {
-        this.dataAtualizacao = LocalDateTime.now();
+    public Pessoa(Long id, String nome) {
+        this.id = id;
+        this.nome = nome;
     }
 }

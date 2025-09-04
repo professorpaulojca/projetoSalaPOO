@@ -1,0 +1,15 @@
+package br.org.umc.spring.projeto.model;
+
+public class Funcionario extends Pessoa {
+
+    private String matricula;
+
+    public Funcionario(String matricula) {
+        this.matricula = matricula;
+    }
+
+    public Funcionario(Long id, String nome, String matricula) {
+        super(id, nome);
+        this.matricula = matricula;
+    }
+}
