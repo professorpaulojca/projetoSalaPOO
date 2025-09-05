@@ -1,10 +1,14 @@
 package br.org.umc.spring.projeto.model;
 
-public class Funcionario extends Pessoa {
+class Funcionario extends Pessoa {
 
     private String matricula;
 
-    public Funcionario(String matricula) {
+    public String getMatricula() {
+        return matricula;
+    }
+
+    public void setMatricula(String matricula) {
         this.matricula = matricula;
     }
 

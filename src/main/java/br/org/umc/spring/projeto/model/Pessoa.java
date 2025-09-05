@@ -1,6 +1,6 @@
 package br.org.umc.spring.projeto.model;
 
-public abstract class Pessoa {
+class Pessoa {
     private Long id;
     private String nome;
 
@@ -20,10 +20,9 @@ public abstract class Pessoa {
         this.nome = nome;
     }
 
-    public Pessoa() {}
-
     public Pessoa(Long id, String nome) {
         this.id = id;
         this.nome = nome;
     }
+
 }
