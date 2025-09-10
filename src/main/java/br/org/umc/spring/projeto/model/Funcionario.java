@@ -1,6 +1,6 @@
 package br.org.umc.spring.projeto.model;
 
-class Funcionario extends Pessoa {
+public class Funcionario extends Pessoa {
 
     private String matricula;
 

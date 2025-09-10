@@ -1,6 +1,6 @@
 package br.org.umc.spring.projeto.model;
 
-public class Produto {
+public class Produto extends Domain {
     private String descricao;
     private double valorUnitario;
 
@@ -20,7 +20,8 @@ public class Produto {
         this.valorUnitario = valorUnitario;
     }
 
-    public Produto(String descricao, double valorUnitario) {
+    public Produto(long id, String descricao, double valorUnitario) {
+        super(id);
         this.descricao = descricao;
         this.valorUnitario = valorUnitario;
     }

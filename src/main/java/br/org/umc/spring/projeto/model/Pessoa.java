@@ -1,6 +1,6 @@
 package br.org.umc.spring.projeto.model;
 
-class Pessoa {
+public class Pessoa {
     private Long id;
     private String nome;
 
