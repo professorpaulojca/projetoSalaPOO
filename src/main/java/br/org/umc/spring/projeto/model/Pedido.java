@@ -8,7 +8,7 @@ public class Pedido {
     private Pessoa comprador;
     private Vendedor vendedor;
     private Timestamp dataHora;
-    private ArrayList<Item> itens;
+    private ArrayList<ItemPedido> itens;
 
     public Long getId() {
         return id;
@@ -42,11 +42,11 @@ public class Pedido {
         this.dataHora = dataHora;
     }
 
-    public ArrayList<Item> getItens() {
+    public ArrayList<ItemPedido> getItens() {
         return itens;
     }
 
-    public void setItens(ArrayList<Item> itens) {
+    public void setItens(ArrayList<ItemPedido> itens) {
         this.itens = itens;
     }
 }
