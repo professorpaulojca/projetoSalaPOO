@@ -1,6 +1,7 @@
 package br.org.umc.spring.projeto.memory;
 
 import br.org.umc.spring.projeto.model.Pedido;
+import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -8,6 +9,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
+@Repository
 public class PedidoStore {
 
     private final ConcurrentHashMap<Long, Pedido> dados = new ConcurrentHashMap<>();

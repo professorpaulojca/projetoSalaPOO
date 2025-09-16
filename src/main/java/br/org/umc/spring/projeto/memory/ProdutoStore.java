@@ -1,6 +1,7 @@
 package br.org.umc.spring.projeto.memory;
 
 import br.org.umc.spring.projeto.model.Produto;
+import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -8,6 +9,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
+@Repository
 public class ProdutoStore {
 
     private final ConcurrentHashMap<Long, Produto> dados = new ConcurrentHashMap<>();
