@@ -23,9 +23,10 @@ public class PedidoEstoqueFacade {
 
     /**
      * Cria um novo pedido com os itens fornecidos
+     *
      * @param pedidoDTO DTO com os dados do pedido
      * @return Pedido criado
-     * @throws EstoqueInsuficienteException Se não houver estoque para algum produto
+     * @throws EstoqueInsuficienteException  Se não houver estoque para algum produto
      * @throws RecursoNaoEncontradoException Se algum recurso não for encontrado
      */
     public PedidoDTO criarPedido(PedidoDTO pedidoDTO) {
@@ -34,6 +35,7 @@ public class PedidoEstoqueFacade {
 
     /**
      * Busca um pedido pelo ID
+     *
      * @param id ID do pedido
      * @return Pedido encontrado
      * @throws RecursoNaoEncontradoException Se o pedido não for encontrado
@@ -42,8 +44,14 @@ public class PedidoEstoqueFacade {
         return pedidoService.buscarPorId(id);
     }
 
+    public PedidoDTO darBaixaNoPedido(Long id)
+            throws RecursoNaoEncontradoException, EstoqueInsuficienteException {
+        return pedidoService.darBaixaNoPedido(id);
+    }
+
     /**
      * Lista todos os pedidos
+     *
      * @return Lista de pedidos
      */
     public List<PedidoDTO> listarPedidos() {

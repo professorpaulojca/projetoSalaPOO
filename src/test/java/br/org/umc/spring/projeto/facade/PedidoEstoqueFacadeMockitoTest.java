@@ -3,6 +3,7 @@ package br.org.umc.spring.projeto.facade;
 
 import br.org.umc.spring.projeto.DTOs.ItemPedidoDTO;
 import br.org.umc.spring.projeto.DTOs.PedidoDTO;
+import br.org.umc.spring.projeto.enums.Status;
 import br.org.umc.spring.projeto.exception.EstoqueInsuficienteException;
 import br.org.umc.spring.projeto.exception.RecursoNaoEncontradoException;
 import br.org.umc.spring.projeto.service.PedidoService;
@@ -20,7 +21,8 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class PedidoEstoqueFacadeMockitoTest {
@@ -145,4 +147,20 @@ class PedidoEstoqueFacadeMockitoTest {
         assertTrue(resultado.isEmpty());
         verify(pedidoService).listarTodos();
     }
+
+    @Test
+    @DisplayName("listarPedidos: deve retornar lista vazia quando não houver pedidos")
+    void dar_baixa_em_um_pedido() {
+
+        pedidoService.darBaixaNoPedido(100L);
+
+        when(pedidoService.buscarPorId(100L)).thenReturn(pedidoDTO);
+
+        PedidoDTO resultado = facade.consultarPedido(100L);
+
+        assertTrue(resultado.getStatus() == Status.CONCLUIDO);
+
+
+    }
+
 }

@@ -12,8 +12,11 @@ public class ItemPedido {
     private Produto produto;
     private int quantidade;
     private BigDecimal precoUnitario;
+    private boolean concluido;
 
-    public ItemPedido() {}
+
+    public ItemPedido() {
+    }
 
     public ItemPedido(Produto produto, int quantidade, BigDecimal precoUnitario) {
         if (produto == null) throw new IllegalArgumentException("Produto não pode ser nulo");
@@ -30,15 +33,38 @@ public class ItemPedido {
         return precoUnitario.multiply(BigDecimal.valueOf(quantidade));
     }
 
+    public boolean isConcluido() {
+        return concluido;
+    }
+
+    public void setConcluido(boolean concluido) {
+        this.concluido = concluido;
+    }
+
     /* Getters/Setters */
-    public Produto getProduto() { return produto; }
-    public void setProduto(Produto produto) { this.produto = produto; }
+    public Produto getProduto() {
+        return produto;
+    }
 
-    public int getQuantidade() { return quantidade; }
-    public void setQuantidade(int quantidade) { this.quantidade = quantidade; }
+    public void setProduto(Produto produto) {
+        this.produto = produto;
+    }
 
-    public BigDecimal getPrecoUnitario() { return precoUnitario; }
-    public void setPrecoUnitario(BigDecimal precoUnitario) { this.precoUnitario = precoUnitario; }
+    public int getQuantidade() {
+        return quantidade;
+    }
+
+    public void setQuantidade(int quantidade) {
+        this.quantidade = quantidade;
+    }
+
+    public BigDecimal getPrecoUnitario() {
+        return precoUnitario;
+    }
+
+    public void setPrecoUnitario(BigDecimal precoUnitario) {
+        this.precoUnitario = precoUnitario;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -51,7 +77,9 @@ public class ItemPedido {
     }
 
     @Override
-    public int hashCode() { return Objects.hash(produto, quantidade, precoUnitario); }
+    public int hashCode() {
+        return Objects.hash(produto, quantidade, precoUnitario);
+    }
 
     @Override
     public String toString() {

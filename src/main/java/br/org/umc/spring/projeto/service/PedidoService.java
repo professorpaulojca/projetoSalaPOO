@@ -2,8 +2,10 @@ package br.org.umc.spring.projeto.service;
 
 import br.org.umc.spring.projeto.DTOs.ItemPedidoDTO;
 import br.org.umc.spring.projeto.DTOs.PedidoDTO;
+import br.org.umc.spring.projeto.enums.Status;
 import br.org.umc.spring.projeto.exception.EstoqueInsuficienteException;
 import br.org.umc.spring.projeto.exception.RecursoNaoEncontradoException;
+import br.org.umc.spring.projeto.memory.MovimentoStore;
 import br.org.umc.spring.projeto.memory.PedidoStore;
 import br.org.umc.spring.projeto.memory.ProdutoStore;
 import br.org.umc.spring.projeto.model.ItemPedido;
@@ -20,10 +22,12 @@ public class PedidoService {
 
     private final PedidoStore pedidoStore;
     private final ProdutoStore produtoStore;
+    private final MovimentoStore movimentoStore;
 
-    public PedidoService(PedidoStore pedidoStore, ProdutoStore produtoStore) {
+    public PedidoService(PedidoStore pedidoStore, ProdutoStore produtoStore, MovimentoStore movimentoStore) {
         this.pedidoStore = pedidoStore;
         this.produtoStore = produtoStore;
+        this.movimentoStore = movimentoStore;
     }
 
     @Transactional
@@ -38,16 +42,16 @@ public class PedidoService {
         // Processa os itens do pedido
         for (ItemPedidoDTO itemDTO : pedidoDTO.getItens()) {
             Produto produto = produtoStore.findById(itemDTO.getProdutoId())
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Produto não encontrado: " + itemDTO.getProdutoId()));
+                    .orElseThrow(() -> new RecursoNaoEncontradoException("Produto não encontrado: " + itemDTO.getProdutoId()));
 
             // Verifica estoque
             if (produto.getEstoqueAtual() < itemDTO.getQuantidade()) {
                 throw new EstoqueInsuficienteException(
-                    String.format("Estoque insuficiente para o produto %s. Disponível: %d, Solicitado: %d",
-                        produto.getDescricao(),
-                        produto.getEstoqueAtual(),
-                        itemDTO.getQuantidade()
-                    )
+                        String.format("Estoque insuficiente para o produto %s. Disponível: %d, Solicitado: %d",
+                                produto.getDescricao(),
+                                produto.getEstoqueAtual(),
+                                itemDTO.getQuantidade()
+                        )
                 );
             }
 
@@ -72,14 +76,14 @@ public class PedidoService {
 
     public PedidoDTO buscarPorId(Long id) {
         return pedidoStore.findById(id)
-            .map(this::toDTO)
-            .orElseThrow(() -> new RecursoNaoEncontradoException("Pedido não encontrado: " + id));
+                .map(this::toDTO)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Pedido não encontrado: " + id));
     }
 
     public List<PedidoDTO> listarTodos() {
         return pedidoStore.findAll().stream()
-            .map(this::toDTO)
-            .collect(Collectors.toList());
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 
     private PedidoDTO toDTO(Pedido pedido) {
@@ -89,11 +93,104 @@ public class PedidoService {
 
         // Converte itens para DTOs
         List<ItemPedidoDTO> itensDTO = pedido.getItens().stream()
-            .map(this::toItemDTO)
-            .collect(Collectors.toList());
+                .map(this::toItemDTO)
+                .collect(Collectors.toList());
         dto.setItens(itensDTO);
 
         return dto;
+    }
+
+    @Transactional
+    public PedidoDTO darBaixaNoPedido(Long id) {
+        // 1) consulta pedido
+        Pedido pedido = pedidoStore.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Pedido não encontrado: " + id));
+
+        // se já estiver concluído, apenas retorna (idempotência)
+        if (isConcluido(pedido)) {
+            return toDTO(pedido);
+        }
+
+        if (pedido.getItens() == null || pedido.getItens().isEmpty()) {
+            throw new IllegalStateException("Pedido " + id + " não possui itens para baixa");
+        }
+
+        // 2) valida estoques de TODOS os itens antes de baixar (evita baixa parcial)
+        for (ItemPedido item : pedido.getItens()) {
+            if (item.getProduto() == null || item.getProduto().getId() == 0) {
+                throw new IllegalStateException("Item do pedido sem produto/ID definido");
+            }
+            Long produtoId = item.getProduto().getId();
+            Produto produto = produtoStore.findById(produtoId)
+                    .orElseThrow(() -> new RecursoNaoEncontradoException("Produto não encontrado: " + produtoId));
+
+            if (produto.getEstoqueAtual() < item.getQuantidade()) {
+                throw new EstoqueInsuficienteException(
+                        String.format("Estoque insuficiente para o produto %s. Disponível: %d, Solicitado: %d",
+                                produto.getDescricao(), produto.getEstoqueAtual(), item.getQuantidade()));
+            }
+        }
+
+        // 3) aplica baixas e 4) registra movimentos (se MovimentoStore estiver disponível)
+        for (ItemPedido item : pedido.getItens()) {
+            Long produtoId = item.getProduto().getId();
+            Produto produto = produtoStore.findById(produtoId)
+                    .orElseThrow(() -> new RecursoNaoEncontradoException("Produto não encontrado: " + produtoId));
+
+            // baixa
+            produto.setEstoqueAtual(produto.getEstoqueAtual() - item.getQuantidade());
+            produtoStore.save(produto);
+
+            // movimento (opcional, só se o MovimentoStore estiver injetado)
+            if (movimentoStore != null) {
+                br.org.umc.spring.projeto.model.Movimento mov =
+                        br.org.umc.spring.projeto.model.Movimento.saida(
+                                produto,
+                                item.getQuantidade(),
+                                pedido,
+                                "Baixa por pedido " + id
+                        );
+                movimentoStore.save(mov);
+            }
+        }
+
+        // 5) marca o pedido como CONCLUIDO (se a entidade tiver esse campo)
+        marcarConcluidoSePossivel(pedido);
+        pedidoStore.save(pedido);
+
+        return toDTO(pedido);
+    }
+
+    private boolean isConcluido(Pedido pedido) {
+        // Verifica se o pedido tem itens e se o tipo de movimento está definido
+        if (pedido == null) {
+            return false;
+        }
+        return pedido.getStatus() != null &&
+                pedido.getItens() != null &&
+                !pedido.getItens().isEmpty();
+    }
+
+    private void marcarConcluidoSePossivel(Pedido pedido) {
+        if (pedido == null) {
+            return;
+        }
+
+        boolean todosItensConcluidos = true;
+        if (pedido.getItens() != null) {
+            for (ItemPedido item : pedido.getItens()) {
+                if (!item.isConcluido()) {  // Assuming ItemPedido has an isConcluido() method
+                    todosItensConcluidos = false;
+                    break;
+                }
+            }
+        }
+
+        if (todosItensConcluidos) {
+            // Assuming Pedido has a method to mark it as completed
+            // If not, you might need to add a status field to the Pedido class
+            pedido.setStatus(Status.CONCLUIDO);
+        }
     }
 
     private ItemPedidoDTO toItemDTO(ItemPedido item) {
