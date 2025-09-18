@@ -1,6 +1,5 @@
 package br.org.umc.spring.projeto.facade;
 
-
 import br.org.umc.spring.projeto.DTOs.ItemPedidoDTO;
 import br.org.umc.spring.projeto.DTOs.PedidoDTO;
 import br.org.umc.spring.projeto.enums.Status;
@@ -19,6 +18,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -149,18 +149,22 @@ class PedidoEstoqueFacadeMockitoTest {
     }
 
     @Test
-    @DisplayName("listarPedidos: deve retornar lista vazia quando não houver pedidos")
+    @DisplayName("darBaixaNoPedido: deve concluir o pedido com sucesso")
     void dar_baixa_em_um_pedido() {
+        // Arrange: Define o comportamento do mock
+        // 1. Quando darBaixaNoPedido for chamado, ele deve alterar o status do DTO
+        pedidoDTO.setStatus(Status.CONCLUIDO); // Simula a mudança de status
+        when(pedidoService.darBaixaNoPedido(100L)).thenReturn(pedidoDTO);
 
-        pedidoService.darBaixaNoPedido(100L);
+        // Act: Chama o método na facade (o objeto que está sendo testado)
+        PedidoDTO resultado = facade.darBaixaNoPedido(100L);
 
-        when(pedidoService.buscarPorId(100L)).thenReturn(pedidoDTO);
+        // Assert: Verifica se o resultado está correto
+        assertNotNull(resultado);
+        assertThat(resultado.getStatus()).isEqualTo(Status.CONCLUIDO);
 
-        PedidoDTO resultado = facade.consultarPedido(100L);
-
-        assertTrue(resultado.getStatus() == Status.CONCLUIDO);
-
-
+        // Verify: Confirma que o método no serviço foi chamado
+        verify(pedidoService).darBaixaNoPedido(100L);
     }
 
 }

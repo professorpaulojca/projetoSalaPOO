@@ -14,6 +14,8 @@ import br.org.umc.spring.projeto.model.Produto;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,10 +32,15 @@ public class PedidoService {
         this.movimentoStore = movimentoStore;
     }
 
+
     @Transactional
     public PedidoDTO criarPedido(PedidoDTO pedidoDTO) {
+        //criar o pedido fazendo a conversão do dto para o model
         Pedido pedido = new Pedido();
-        pedido.setId(null); // Será gerado pelo store
+        pedido.setDataHora(new Timestamp(System.currentTimeMillis()));
+        pedido.setStatus(Status.PENDENTE);
+        pedido.setItens(new ArrayList<>()); // Essencial para evitar NullPointerException
+
 
         // Aqui você pode adicionar lógica para buscar comprador e vendedor
         // pedido.setComprador(comprador);
@@ -166,7 +173,7 @@ public class PedidoService {
         if (pedido == null) {
             return false;
         }
-        return pedido.getStatus() != null &&
+        return pedido.getStatus() != Status.CONCLUIDO &&
                 pedido.getItens() != null &&
                 !pedido.getItens().isEmpty();
     }
@@ -199,4 +206,6 @@ public class PedidoService {
         dto.setQuantidade(item.getQuantidade());
         return dto;
     }
+
+
 }

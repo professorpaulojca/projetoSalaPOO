@@ -7,6 +7,17 @@ public class Produto extends Domain {
     private BigDecimal valorUnitario;
     private long estoqueAtual;
 
+    public Produto(long id, String descricao, BigDecimal valorUnitario, long estoqueAtual) {
+        super(id);
+        this.descricao = descricao;
+        this.valorUnitario = valorUnitario;
+        this.estoqueAtual = estoqueAtual;
+    }
+
+    public Produto() {
+        super();
+    }
+
     public String getDescricao() {
         return descricao;
     }
@@ -28,13 +39,6 @@ public class Produto extends Domain {
     }
 
     public void setEstoqueAtual(long estoqueAtual) {
-        this.estoqueAtual = estoqueAtual;
-    }
-
-    public Produto(long id, String descricao, BigDecimal valorUnitario, long estoqueAtual) {
-        super(id);
-        this.descricao = descricao;
-        this.valorUnitario = valorUnitario;
         this.estoqueAtual = estoqueAtual;
     }
 }
