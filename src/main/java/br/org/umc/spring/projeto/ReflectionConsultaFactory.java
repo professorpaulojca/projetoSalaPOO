@@ -1,7 +1,7 @@
 package br.org.umc.spring.projeto;
 
-import br.org.umc.spring.projeto.enums.Especialidade;
 import br.org.umc.spring.projeto.interfaces.Consulta;
+import br.org.umc.spring.projeto.enums.Especialidade;
 
 public class ReflectionConsultaFactory {
 

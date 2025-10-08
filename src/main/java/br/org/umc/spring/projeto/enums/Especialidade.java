@@ -1,8 +1,5 @@
 package br.org.umc.spring.projeto.enums;
 
-import lombok.Getter;
-
-@Getter
 public enum Especialidade {
     PEDIATRIA("br.org.umc.spring.projeto.clinica.ConsultaPediatria"),
     CARDIOLOGIA("br.org.umc.spring.projeto.clinica.ConsultaCardiologia"),
@@ -14,4 +11,7 @@ public enum Especialidade {
         this.className = className;
     }
 
+    public String getClassName() {
+        return className;
+    }
 }
