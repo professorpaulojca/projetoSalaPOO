@@ -8,6 +8,7 @@ import br.org.umc.spring.projeto.memory.PedidoStore;
 import br.org.umc.spring.projeto.memory.ProdutoStore;
 import br.org.umc.spring.projeto.model.Produto;
 import br.org.umc.spring.projeto.service.PedidoService;
+import br.org.umc.spring.projeto.fila.FilaPedidos;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,15 +16,13 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.util.Collections;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
+import static org.junit.jupiter.api.Assertions.*;
 public class PedidoEstoqueFacadeSemMock {
 
     private PedidoEstoqueFacade facade;
     private ProdutoStore produtoStore;
     private PedidoStore pedidoStore;
-
+    private FilaPedidos filaPedidos;
     private Produto produto;
 
     @BeforeEach
@@ -33,7 +32,8 @@ public class PedidoEstoqueFacadeSemMock {
         pedidoStore = new PedidoStore();
         MovimentoStore movimentoStore = new MovimentoStore();
 
-        PedidoService pedidoService = new PedidoService(pedidoStore, produtoStore, movimentoStore);
+        filaPedidos = new FilaPedidos();
+        PedidoService pedidoService = new PedidoService(pedidoStore, produtoStore, movimentoStore, filaPedidos);
         facade = new PedidoEstoqueFacade(pedidoService);
 
         // 2. Configurar o estado inicial: criar um produto com estoque

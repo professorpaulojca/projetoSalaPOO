@@ -1,35 +1,73 @@
 package br.org.umc.spring.projeto.service;
 
 import br.org.umc.spring.projeto.DTOs.ItemPedidoDTO;
+import br.org.umc.spring.projeto.DTOs.MsgEnvelope;
+import br.org.umc.spring.projeto.DTOs.PedidoCriado;
 import br.org.umc.spring.projeto.DTOs.PedidoDTO;
 import br.org.umc.spring.projeto.enums.Status;
 import br.org.umc.spring.projeto.exception.EstoqueInsuficienteException;
 import br.org.umc.spring.projeto.exception.RecursoNaoEncontradoException;
+import br.org.umc.spring.projeto.fila.FilaPedidos;
 import br.org.umc.spring.projeto.memory.MovimentoStore;
 import br.org.umc.spring.projeto.memory.PedidoStore;
 import br.org.umc.spring.projeto.memory.ProdutoStore;
 import br.org.umc.spring.projeto.model.ItemPedido;
 import br.org.umc.spring.projeto.model.Pedido;
 import br.org.umc.spring.projeto.model.Produto;
+import br.org.umc.spring.projeto.utilidades.Jsons;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
 public class PedidoService {
 
+    private static final Logger log =                             // define logger
+            LoggerFactory.getLogger(PedidoService.class);         // amarrado à classe
+
     private final PedidoStore pedidoStore;
     private final ProdutoStore produtoStore;
     private final MovimentoStore movimentoStore;
+    private final FilaPedidos filaPedidos;
 
-    public PedidoService(PedidoStore pedidoStore, ProdutoStore produtoStore, MovimentoStore movimentoStore) {
+    @Autowired
+    public PedidoService(PedidoStore pedidoStore, ProdutoStore produtoStore, MovimentoStore movimentoStore, FilaPedidos filaPedidos) {
         this.pedidoStore = pedidoStore;
         this.produtoStore = produtoStore;
-        this.movimentoStore = movimentoStore;
+        this.movimentoStore = movimentoStore;               // construtor p/ injeção
+        this.filaPedidos = filaPedidos;                           // atribui dependência
+    }
+
+    public void criarPedido(PedidoCriado pedido) {                // método público de criação
+        var envelope = new MsgEnvelope<>(                         // cria o envelope genérico
+                "PedidoCriado",                                   // type lógico
+                UUID.randomUUID().toString(),                     // messageId único
+                Instant.now(),                                    // createdAt (agora)
+                Map.of(                                           // headers simples
+                        "correlationId", UUID.randomUUID().toString(), // id de correlação
+                        "source", "PedidoService",                // origem
+                        "contentType", "application/json"         // tipo de conteúdo
+                ),
+                pedido                                            // body: o payload do evento
+        );                                                        // fim da construção do envelope
+
+        log.info("ENFILEIRADO >>> \n{}", Jsons.toJson(envelope)); // loga envelope em JSON para didática
+
+        boolean ok = filaPedidos.fila().offer(envelope);          // tenta colocar na fila sem bloquear
+        if (!ok) {                                                // se a fila estiver cheia (se tiver limite)
+            throw new IllegalStateException(                      // lança exceção (didático)
+                    "Fila de pedidos cheia, tente novamente");    // mensagem clara
+        }                                                         // fim if
     }
 
 
