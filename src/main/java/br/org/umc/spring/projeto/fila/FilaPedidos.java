@@ -1,7 +1,5 @@
 package br.org.umc.spring.projeto.fila;
 
-import br.org.umc.spring.projeto.DTOs.MsgEnvelope;
-import br.org.umc.spring.projeto.DTOs.PedidoCriado;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.BlockingQueue;

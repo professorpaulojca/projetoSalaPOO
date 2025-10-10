@@ -1,4 +1,4 @@
-package br.org.umc.spring.projeto.DTOs;
+package br.org.umc.spring.projeto.fila;
 
 public record PedidoCriado(
         Long id,                                 // identificador do pedido

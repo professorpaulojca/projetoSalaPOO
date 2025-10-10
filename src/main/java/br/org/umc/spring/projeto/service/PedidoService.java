@@ -1,13 +1,13 @@
 package br.org.umc.spring.projeto.service;
 
 import br.org.umc.spring.projeto.DTOs.ItemPedidoDTO;
-import br.org.umc.spring.projeto.DTOs.MsgEnvelope;
-import br.org.umc.spring.projeto.DTOs.PedidoCriado;
 import br.org.umc.spring.projeto.DTOs.PedidoDTO;
 import br.org.umc.spring.projeto.enums.Status;
 import br.org.umc.spring.projeto.exception.EstoqueInsuficienteException;
 import br.org.umc.spring.projeto.exception.RecursoNaoEncontradoException;
 import br.org.umc.spring.projeto.fila.FilaPedidos;
+import br.org.umc.spring.projeto.fila.MsgEnvelope;
+import br.org.umc.spring.projeto.fila.PedidoCriado;
 import br.org.umc.spring.projeto.memory.MovimentoStore;
 import br.org.umc.spring.projeto.memory.PedidoStore;
 import br.org.umc.spring.projeto.memory.ProdutoStore;
